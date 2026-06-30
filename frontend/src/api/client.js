@@ -1,9 +1,13 @@
 // API client — wraps Axios calls to the Flask backend.
 import axios from 'axios';
 
-// Base URL falls back to relative path when served behind the same host.
+// Base URL dynamically points to backend on same host in production, or localhost:5000 in dev
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  process.env.REACT_APP_API_URL ||
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000'
+    : typeof window !== 'undefined' ? window.location.origin : '');
+
 
 const client = axios.create({
   baseURL: API_BASE_URL,

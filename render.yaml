@@ -1,4 +1,7 @@
 services:
+  # -------------------------------------------------------------------------
+  # 1. Backend Flask Service
+  # -------------------------------------------------------------------------
   - type: web
     name: autoreport-ai-backend
     runtime: python
@@ -16,3 +19,21 @@ services:
         generateValue: true
       - key: MYSQL_USER
         value: ""            # Leave empty to use SQLite
+
+  # -------------------------------------------------------------------------
+  # 2. Frontend React Service (Static Site - Free tier)
+  # -------------------------------------------------------------------------
+  - type: static
+    name: autoreport-ai-frontend
+    runtime: web
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: build
+    routes:
+      # Rewrites all paths to index.html for React Router SPA support
+      - type: rewrite
+        src: /*
+        dest: /index.html
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://autoreport-x0dt.onrender.com  # Points to your Flask backend URL

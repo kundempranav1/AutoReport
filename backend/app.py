@@ -45,7 +45,15 @@ RESULTS_CACHE: dict[str, dict] = {}
 
 def create_app(config_class: type = Config) -> Flask:
     """Application factory."""
-    app = Flask(__name__)
+    # Resolve frontend build path relative to this backend folder
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    frontend_build = os.path.join(os.path.dirname(backend_dir), 'frontend', 'build')
+
+    app = Flask(
+        __name__,
+        static_folder=frontend_build,
+        static_url_path='/'
+    )
     app.config.from_object(config_class)
 
     # CORS for the React dev server.
@@ -355,11 +363,23 @@ def create_app(config_class: type = Config) -> Flask:
             traceback.print_exc()
             return jsonify({'error': f'Chat failed: {e}'}), 500
 
-    # ----- History (optional helper) --------------------------------------
-    @app.route('/history', methods=['GET'])
-    def history():
-        rows = ProcessRun.query.order_by(ProcessRun.started_at.desc()).limit(50).all()
-        return jsonify([r.to_dict() for r in rows]), 200
+    # ----- Catch-all SPA Routing ------------------------------------------
+    # Serve index.html or static assets for any non-API routes.
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def index(path):
+        # Prevent routing API calls to index.html (return a clean 404 instead)
+        if path.startswith(('upload', 'process', 'dashboard', 'report', 'chat', 'health', 'reports')):
+            abort(404)
+        
+        static_folder = app.static_folder
+        if static_folder and os.path.exists(os.path.join(static_folder, path)):
+            return send_from_directory(static_folder, path)
+            
+        if static_folder and os.path.exists(os.path.join(static_folder, 'index.html')):
+            return send_from_directory(static_folder, 'index.html')
+            
+        return "Backend is running. Build frontend to view the UI."
 
     return app
 
