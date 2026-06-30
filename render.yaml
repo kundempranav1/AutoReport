@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: autoreport-ai-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --timeout 120 --workers 1 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false          # Set this manually in Render dashboard
+      - key: OPENAI_MODEL
+        value: gpt-3.5-turbo
+      - key: SECRET_KEY
+        generateValue: true  # Render auto-generates a secure secret
+      - key: MYSQL_USER
+        value: ""            # Leave empty to use SQLite (no DB setup needed)
