@@ -3,15 +3,16 @@ services:
     name: autoreport-ai-backend
     runtime: python
     rootDir: backend
-    pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --timeout 120 --workers 1 --bind 0.0.0.0:$PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"      # Force Python 3.11 — 3.14 breaks pandas compilation
       - key: OPENAI_API_KEY
         sync: false          # Set this manually in Render dashboard
       - key: OPENAI_MODEL
         value: gpt-3.5-turbo
       - key: SECRET_KEY
-        generateValue: true  # Render auto-generates a secure secret
+        generateValue: true
       - key: MYSQL_USER
-        value: ""            # Leave empty to use SQLite (no DB setup needed)
+        value: ""            # Leave empty to use SQLite
