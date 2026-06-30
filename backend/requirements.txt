@@ -2,18 +2,17 @@
 Flask==3.0.3
 Flask-Cors==4.0.1
 Flask-SQLAlchemy==3.1.1
-gunicorn==22.0.0          # Production WSGI server for Render deployment
+gunicorn==22.0.0
 
 # ===== Data Processing =====
-# pinned to versions with pre-built wheels for Python 3.11
 pandas==2.2.3
 numpy==1.26.4
-openpyxl==3.1.5           # Read .xlsx files
+openpyxl==3.1.5
 
 # ===== Charts / Reports =====
 plotly==5.22.0
 reportlab==4.2.5
-kaleido==0.2.1             # Export Plotly figures to PNG for the PDF report
+kaleido==0.2.1
 
 # ===== AI / LangChain =====
 langchain==0.2.16
