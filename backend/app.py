@@ -379,8 +379,13 @@ def _analysis_for_api(analysis: dict) -> dict:
     return out
 
 
-# ---- Entrypoint -----------------------------------------------------------
+# ---- WSGI / Vercel entrypoint ---------------------------------------------
+# Expose a module-level `app` so that Vercel, gunicorn, and any other WSGI
+# server can discover the Flask application without executing __main__.
+#   gunicorn command : gunicorn app:app
+#   Vercel           : detects `app` automatically in app.py
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
-    # 0.0.0.0 so the React dev server (running on another origin) can reach it.
+    # Local development only.
     app.run(host='0.0.0.0', port=5000, debug=True)
