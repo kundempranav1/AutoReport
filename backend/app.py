@@ -231,11 +231,14 @@ def create_app(config_class: type = Config) -> Flask:
 
                     # 6. Chatbot — initialise but don't ask a question here.
                     yield sse('progress', {'agent': 5, 'label': 'Chatbot Agent'})
+                    forecast_chart = next((c for c in charts if 'forecast_meta' in c), None)
+                    forecast_meta = forecast_chart['forecast_meta'] if forecast_chart else None
+
                     chatbot = ChatbotAgent(
                         api_key=app.config['OPENAI_API_KEY'],
                         model=app.config['OPENAI_MODEL'],
                     )
-                    chatbot.prime(df_clean)
+                    chatbot.prime(df_clean, forecast_meta)
                     yield sse('progress', {'agent': 5, 'label': 'Chatbot Agent', 'done': True})
 
                     # Track the report row.
@@ -349,11 +352,15 @@ def create_app(config_class: type = Config) -> Flask:
 
                 df = _load_dataframe(upload_row.stored_path)
                 df_clean = DataCleaningAgent().run(df)
+                charts = DashboardAgent().run(df_clean)
+                forecast_chart = next((c for c in charts if 'forecast_meta' in c), None)
+                forecast_meta = forecast_chart['forecast_meta'] if forecast_chart else None
+
                 chatbot = ChatbotAgent(
                     api_key=app.config['OPENAI_API_KEY'],
                     model=app.config['OPENAI_MODEL'],
                 )
-                chatbot.prime(df_clean)
+                chatbot.prime(df_clean, forecast_meta)
                 ChatbotAgent.cache_set(file_id, chatbot)
 
             answer = chatbot.ask(question)

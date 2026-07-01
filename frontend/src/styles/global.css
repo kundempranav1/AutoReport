@@ -534,10 +534,84 @@ a {
   background: var(--surface);
 }
 
+/* ===== Future Sales Forecast styles ===== */
+.forecast-layout {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 14px;
+}
+
+.forecast-table-container {
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+
+.forecast-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.forecast-table th {
+  background: var(--primary);
+  color: #ffffff;
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+.forecast-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.forecast-table tr:last-child td {
+  border-bottom: none;
+}
+
+.forecast-table tr:hover {
+  background: rgba(30, 108, 246, 0.04);
+}
+
+.forecast-table .period-cell {
+  color: var(--text);
+}
+
+.forecast-table .value-cell {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.forecast-table .range-cell {
+  color: var(--muted);
+}
+
 /* ===== Responsive ===== */
+@media (max-width: 992px) {
+  .forecast-layout {
+    flex-direction: column;
+  }
+  .forecast-table-container {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 16px;
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .hero h1 { font-size: 24px; }
   .nav-links { display: none; }
   .chart-grid { grid-template-columns: 1fr; }
   .upload-area { padding: 22px 14px; }
 }
+

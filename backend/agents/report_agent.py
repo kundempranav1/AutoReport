@@ -125,9 +125,51 @@ class ReportAgent:
 
         story.append(PageBreak())
 
-        # --- Charts ----------------------------------------------------
-        story.append(Paragraph('Visualisations', h2))
+        # --- Future Sales Forecasting & Trend Projection (NEW) ----------
+        forecast_chart = next((c for c in charts if 'forecast_meta' in c), None)
+        if forecast_chart:
+            story.append(Spacer(1, 0.5 * cm))
+            story.append(Paragraph('Future Sales Forecasting & Predictive Analytics', h2))
+            
+            meta = forecast_chart['forecast_meta']
+            sales_col = meta.get('sales_col', 'Value')
+            story.append(Paragraph(
+                f"The AI forecasting engine analyzed the historical trends of <b>{sales_col}</b> "
+                f"and performed a linear regression trend extrapolation for the next 6 periods. "
+                f"The table below details the projected values along with the 90% confidence boundaries.",
+                normal
+            ))
+            story.append(Spacer(1, 0.4 * cm))
+            
+            # Forecast Table
+            forecast_rows = [['Period', 'Projected Forecast', 'Lower Boundary', 'Upper Boundary']]
+            for p in meta['predictions']:
+                forecast_rows.append([
+                    str(p['period']),
+                    f"{p['value']:,}",
+                    f"{p['lower']:,}",
+                    f"{p['upper']:,}"
+                ])
+            story.append(self._simple_table(forecast_rows, col_widths=[4 * cm, 4.5 * cm, 3.5 * cm, 3.5 * cm]))
+            story.append(Spacer(1, 0.5 * cm))
+
+            # Forecast Chart
+            png_path = self._chart_to_png(forecast_chart)
+            if png_path:
+                try:
+                    img = Image(png_path, width=15 * cm, height=7.5 * cm)
+                    story.append(img)
+                except Exception:
+                    pass
+            story.append(PageBreak())
+
+        # --- Visualisations ----------------------------------------------------
+        story.append(Paragraph('Visualisations & Chart Dashboards', h2))
         for chart in charts:
+            # Skip rendering the forecast chart twice
+            if 'forecast_meta' in chart:
+                continue
+                
             png_path = self._chart_to_png(chart)
             if png_path:
                 story.append(Paragraph(chart.get('title', ''), styles['Heading4']))

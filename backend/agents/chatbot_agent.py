@@ -41,6 +41,7 @@ class ChatbotAgent:
         self._cat_stats: Dict[str, Dict[str, Any]]  = {}   # col -> {unique, top, freq}
         self._missing: Dict[str, int] = {}
         self._dtypes: Dict[str, str] = {}
+        self.forecast_meta: Optional[Dict[str, Any]] = None
 
     # ------------------------------------------------------------------
     @classmethod
@@ -52,8 +53,9 @@ class ChatbotAgent:
         cls._CACHE[file_id] = agent
 
     # ------------------------------------------------------------------
-    def prime(self, df: pd.DataFrame) -> None:
+    def prime(self, df: pd.DataFrame, forecast_meta: Optional[Dict[str, Any]] = None) -> None:
         """Pre-compute stats from the DataFrame for instant local answers."""
+        self.forecast_meta = forecast_meta
         if df is None or df.empty:
             self.summary = "The dataset is empty."
             return
@@ -126,6 +128,15 @@ class ChatbotAgent:
                 row_str = row_str[:400] + "..."
             parts.append(f"  {i}. {row_str}")
 
+        # Add predictive forecast metadata to context if present
+        if self.forecast_meta:
+            parts.append("\nPREDICTIVE FORECASTING DATA:")
+            parts.append(f"Historical trend extrapolation for column: {self.forecast_meta['sales_col']}")
+            parts.append(f"Last observed actual value: {self.forecast_meta['last_historical_val']} (Period: {self.forecast_meta['last_historical_period']})")
+            parts.append("Future sales forecasts:")
+            for p in self.forecast_meta['predictions']:
+                parts.append(f"  - Period {p['period']}: Projected={p['value']} (range: {p['lower']} to {p['upper']})")
+
         self.summary = "\n".join(parts)
 
     # ------------------------------------------------------------------
@@ -154,6 +165,22 @@ class ChatbotAgent:
         pre-computed stats. Returns None if the question is not recognised.
         """
         q = question.lower().strip()
+
+        # --- Future Forecast / Predictions (NEW) -----------------------
+        if re.search(r'\b(forecast|predict|prediction|future|project|projection)\b', q):
+            if self.forecast_meta:
+                meta = self.forecast_meta
+                lines = [
+                    f"🔮 **AutoReport AI Forecasting Summary for {meta['sales_col']}:**",
+                    f"Last actual observed value: **{meta['last_historical_val']:,}** (Period: {meta['last_historical_period']})",
+                    "",
+                    "**Projected values (next 6 periods):**"
+                ]
+                for p in meta['predictions']:
+                    lines.append(f"  • **{p['period']}**: {p['value']:,} *(range: {p['lower']:,} to {p['upper']:,})*")
+                return "\n".join(lines)
+            else:
+                return "I don't have enough historic time-series data or numerical values to generate a reliable future forecast for this dataset."
 
         # --- Row / column counts --------------------------------------
         if re.search(r'\b(how many|total|number of)\b.*\brow', q) or q in ("rows?", "row count"):
