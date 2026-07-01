@@ -41,7 +41,7 @@ class ChatbotAgent:
         self._cat_stats: Dict[str, Dict[str, Any]]  = {}   # col -> {unique, top, freq}
         self._missing: Dict[str, int] = {}
         self._dtypes: Dict[str, str] = {}
-        self.forecast_meta: Optional[Dict[str, Any]] = None
+        self.forecast_list: List[Dict[str, Any]] = []
 
     # ------------------------------------------------------------------
     @classmethod
@@ -53,9 +53,9 @@ class ChatbotAgent:
         cls._CACHE[file_id] = agent
 
     # ------------------------------------------------------------------
-    def prime(self, df: pd.DataFrame, forecast_meta: Optional[Dict[str, Any]] = None) -> None:
+    def prime(self, df: pd.DataFrame, forecast_list: Optional[List[Dict[str, Any]]] = None) -> None:
         """Pre-compute stats from the DataFrame for instant local answers."""
-        self.forecast_meta = forecast_meta
+        self.forecast_list = forecast_list or []
         if df is None or df.empty:
             self.summary = "The dataset is empty."
             return
@@ -129,13 +129,15 @@ class ChatbotAgent:
             parts.append(f"  {i}. {row_str}")
 
         # Add predictive forecast metadata to context if present
-        if self.forecast_meta:
+        if self.forecast_list:
             parts.append("\nPREDICTIVE FORECASTING DATA:")
-            parts.append(f"Historical trend extrapolation for column: {self.forecast_meta['sales_col']}")
-            parts.append(f"Last observed actual value: {self.forecast_meta['last_historical_val']} (Period: {self.forecast_meta['last_historical_period']})")
-            parts.append("Future sales forecasts:")
-            for p in self.forecast_meta['predictions']:
-                parts.append(f"  - Period {p['period']}: Projected={p['value']} (range: {p['lower']} to {p['upper']})")
+            for meta in self.forecast_list:
+                parts.append(f"Historical trend extrapolation for column: {meta['sales_col']}")
+                parts.append(f"Last observed actual value: {meta['last_historical_val']} (Period: {meta['last_historical_period']})")
+                parts.append("Future sales forecasts:")
+                for p in meta['predictions']:
+                    parts.append(f"  - Period {p['period']}: Projected={p['value']} (range: {p['lower']} to {p['upper']})")
+                parts.append("")
 
         self.summary = "\n".join(parts)
 
@@ -168,8 +170,18 @@ class ChatbotAgent:
 
         # --- Future Forecast / Predictions (NEW) -----------------------
         if re.search(r'\b(forecast|predict|prediction|future|project|projection)\b', q):
-            if self.forecast_meta:
-                meta = self.forecast_meta
+            if self.forecast_list:
+                # Find if a specific column is mentioned in the query
+                target_meta = None
+                for meta in self.forecast_list:
+                    if meta['sales_col'].lower() in q:
+                        target_meta = meta
+                        break
+                # Fall back to the first one if none is explicitly mentioned
+                if not target_meta:
+                    target_meta = self.forecast_list[0]
+                
+                meta = target_meta
                 lines = [
                     f"🔮 **AutoReport AI Forecasting Summary for {meta['sales_col']}:**",
                     f"Last actual observed value: **{meta['last_historical_val']:,}** (Period: {meta['last_historical_period']})",

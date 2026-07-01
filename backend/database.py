@@ -5,6 +5,7 @@ Defines a single SQLAlchemy instance + three lightweight models that
 track uploads, generated reports, and pipeline runs.
 """
 from datetime import datetime
+# pyrefly: ignore [missing-import]
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()

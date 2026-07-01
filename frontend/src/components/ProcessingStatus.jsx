@@ -4,12 +4,12 @@ import React from 'react';
 // `currentIndex` is -1 before processing starts, N while agent N runs, and
 // `agents.length` after the chain has finished.
 const AGENT_LABELS = [
-  { key: 'clean',   label: 'Data Cleaning Agent',         desc: 'Filling missing values, dropping duplicates' },
-  { key: 'analysis', label: 'Analysis Agent',            desc: 'Statistical summary, correlations, types' },
-  { key: 'kpi',     label: 'KPI Generation Agent',       desc: 'Top-level metrics' },
-  { key: 'dash',    label: 'Dashboard Generation Agent', desc: 'Bar, Line, Pie, Histogram charts' },
-  { key: 'report',  label: 'Report Generation Agent',    desc: 'Professional PDF report' },
-  { key: 'chat',    label: 'Chatbot for Dataset Q&A',    desc: 'LangChain + OpenAI assistant' },
+  { key: 'clean',    label: 'Data Cleaning Agent',         desc: 'Filling missing values, dropping duplicates' },
+  { key: 'analysis', label: 'Analysis Agent',              desc: 'Statistical summary, correlations, types' },
+  { key: 'kpi',      label: 'KPI Generation Agent',        desc: 'Top-level metrics' },
+  { key: 'dash',     label: 'Dashboard Generation Agent',  desc: 'Bar, Line, Pie, Histogram, Scatter, Box, Multi-Line, Forecast charts' },
+  { key: 'report',   label: 'Report Generation Agent',     desc: 'Professional PDF report with charts & forecasts' },
+  { key: 'chat',     label: 'Chatbot for Dataset Q&A',     desc: 'LangChain + OpenAI assistant' },
 ];
 
 export default function ProcessingStatus({ currentIndex, error }) {

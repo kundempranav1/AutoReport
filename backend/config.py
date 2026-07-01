@@ -6,6 +6,7 @@ clean. Reads from environment variables (or a .env file in development).
 """
 import os
 from pathlib import Path
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 # Load .env if it exists (silently ignored otherwise).

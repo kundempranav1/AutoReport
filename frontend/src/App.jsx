@@ -106,14 +106,42 @@ export default function App() {
           <KpiCards kpis={result?.kpis} />
         </section>
 
-        <section className="section">
-          <div className="card" style={{ marginBottom: 18 }}>
-            <h3 className="card-title">
-              <span className="icon">📈</span> Dashboard
-            </h3>
-          </div>
-          <DashboardCharts charts={result?.charts} />
-        </section>
+        {result && (
+          <>
+            {/* Filter charts to display in separate dashboard sections */}
+            {(() => {
+              const allCharts = result.charts || [];
+              const standardCharts = allCharts.filter(c => !c.forecast_meta);
+              const forecastCharts = allCharts.filter(c => !!c.forecast_meta);
+
+              return (
+                <>
+                  {standardCharts.length > 0 && (
+                    <section className="section">
+                      <div className="card" style={{ marginBottom: 18 }}>
+                        <h3 className="card-title">
+                          <span className="icon">📊</span> Historical Analytics & Visualisations
+                        </h3>
+                      </div>
+                      <DashboardCharts charts={standardCharts} />
+                    </section>
+                  )}
+
+                  {forecastCharts.length > 0 && (
+                    <section className="section" id="forecasting">
+                      <div className="card" style={{ marginBottom: 18 }}>
+                        <h3 className="card-title">
+                          <span className="icon">🔮</span> Future Trend Forecasting Dashboard
+                        </h3>
+                      </div>
+                      <DashboardCharts charts={forecastCharts} />
+                    </section>
+                  )}
+                </>
+              );
+            })()}
+          </>
+        )}
 
         <ReportDownload
           reportUrl={result?.report_url}
