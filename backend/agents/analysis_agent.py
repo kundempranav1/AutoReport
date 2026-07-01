@@ -102,6 +102,10 @@ def _safe_scalar(v) -> Any:
             return int(v)
         if isinstance(v, (np.floating,)):
             return _safe_float(v)
+        if hasattr(v, 'isoformat'):  # handles datetime, date, and pd.Timestamp
+            return v.isoformat()
+        if isinstance(v, (pd.Timestamp, pd.Period)):
+            return str(v)
         return v
     except Exception:
         return None
